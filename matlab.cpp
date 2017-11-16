@@ -47,7 +47,7 @@ void Matlab::loadfile(const char* File)
 				}
 			}
 			if (flag == false)
-			{
+			{   cout << token<< endl;
 				matrixx[matricesNumber] = new CMatrix(token,1,1,0,0);
 				outputIndex = matricesNumber;
 				matricesNumber++;
@@ -118,12 +118,13 @@ void Matlab::loadfile(const char* File)
 					for (int i=0;i<matricesNumber;i++)
 					{
 						if (token == matrixx[i]->getName())
-						{
-							operand1=*matrixx[i];
+						{  
+							operand1= *matrixx[i];
 							break;  
 						}
 					}
 					result = result / operand1;
+					cout << "Result : " << result << endl;
 				}
 				token = strtok_s(NULL , seps, &context);
 			}

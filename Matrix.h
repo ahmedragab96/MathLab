@@ -26,10 +26,10 @@ public:
 	string getName();
 	string getstring ();
 
-	CMatrix Transpose();
+	/*CMatrix Transpose();
 	double Determinant();
 	CMatrix COFactor();
-	CMatrix Inverse();
+	CMatrix& Inverse();*/
 	
 	friend ostream& operator << (ostream& out , CMatrix& m);
 	friend istream& operator >> (istream & in , CMatrix& m);
@@ -40,8 +40,11 @@ public:
 	CMatrix& operator* (CMatrix &x);
 	CMatrix& operator - (CMatrix& m);
     CMatrix& operator + (CMatrix& m);
-	CMatrix& operator / (CMatrix& m);
-
+	CMatrix& operator / (CMatrix& const m);
+	CMatrix& operator*(double d);
+	CMatrix& getTranspose();
+	double getDeterminant();
+	CMatrix& getinverse();
 
 	/**************************************************/
 };

@@ -17,7 +17,7 @@ int main (int argc , char* argv[]){
 //  readfile("G:\\test.txt");
 	/*if(argc > 1)
 	{*/
-		myMatLab1.loadfile("D://New Text Document.txt");
+		myMatLab1.loadfile("D://testmatrix.txt");
 	/*}
 	else
 	{

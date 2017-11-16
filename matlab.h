@@ -10,7 +10,7 @@ class Matlab
 
 public:
 	Matlab();
-	~Matlab();
+	//~Matlab();
 	void loadfile (const char* File);
 	void loadconsole ();
 	
