@@ -1,7 +1,7 @@
 #ifndef MATLAB_H 
 #define MATLAB_H
 #include <iostream>
-#include "matrix.h"
+#include "Matrix.h"
 using namespace std;
 class Matlab
 {
@@ -10,7 +10,6 @@ class Matlab
 
 public:
 	Matlab();
-	~Matlab();
 	void loadfile (const char* File);
 	void loadconsole ();
 	
