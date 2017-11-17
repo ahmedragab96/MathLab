@@ -23,14 +23,12 @@ void Matlab::loadfile(const char* File)
 			cout << matrixx[matricesNumber]->getstring()<<endl;
 			matricesNumber++;
 		}
-		else if (inputLine == "Exit")
+		else if (inputLine == "quit")
 		{
-			cout << "That's All for now!byee" << endl;
 			break;
 		}
 		else
 		{
-			cout << inputLine<<endl;
 			char* seps = " =;";
 			char* context = NULL;
 			char* token = NULL;
@@ -47,7 +45,7 @@ void Matlab::loadfile(const char* File)
 				}
 			}
 			if (flag == false)
-			{
+			{   
 				matrixx[matricesNumber] = new CMatrix(token,1,1,0,0);
 				outputIndex = matricesNumber;
 				matricesNumber++;
@@ -65,7 +63,6 @@ void Matlab::loadfile(const char* File)
 				}
 			}
 			token = strtok_s(NULL , seps, &context);
-			
 			while(token)
 			{
 				
@@ -118,8 +115,8 @@ void Matlab::loadfile(const char* File)
 					for (int i=0;i<matricesNumber;i++)
 					{
 						if (token == matrixx[i]->getName())
-						{
-							operand1=*matrixx[i];
+						{  
+							operand1= *matrixx[i];
 							break;  
 						}
 					}

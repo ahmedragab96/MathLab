@@ -64,13 +64,13 @@ CMatrix :: CMatrix (string inputLine)
 	char* seps_c = " ,;=[]";
 	char* context_c = NULL;
     char* token_c = NULL;
-	char* rowString = new char [x.length()+1];;
+	char* rowString = new char [x.length()+1];
 	strcpy(rowString,x.c_str());
-	token_c = strtok_s(rowString , seps_c, &context_c);
+	token_c = strtok(rowString , seps_c);
 	while(token_c)
 	{
-		 cols++;
-		token_c = strtok_s(NULL , seps_c, &context_c);
+		cols++;
+		token_c = strtok(NULL , seps_c);
 	}
 	coloumnsNumbers = cols;
     char* stringToBeSplitted = new char [inputLine.length()+1];
@@ -78,9 +78,9 @@ CMatrix :: CMatrix (string inputLine)
 	char* seps = " ,;=[]";
 	char* context = NULL;
     char* token = NULL;
-	token = strtok_s(stringToBeSplitted , seps, &context);
+	token = strtok(stringToBeSplitted , seps);
 	strcpy(matrixName,token);
-	token = strtok_s(NULL,seps,&context);
+	token = strtok(NULL,seps);
 	for (int i =0;i< rowsNumbers;i++)
 	{
 		matrix[i] = new double [coloumnsNumbers];
@@ -88,14 +88,14 @@ CMatrix :: CMatrix (string inputLine)
 		{
 			double item = atof(token);
 			matrix[i][j]=item;
-			token = strtok_s(NULL,seps,&context);
+			token = strtok(NULL,seps);
 		}
 	}
 }
        // copy constructor 
 CMatrix :: CMatrix (CMatrix& m)
 {
-	//strcpy(matrixName,m.matrixName);
+	
 	
 	this->coloumnsNumbers = m.coloumnsNumbers;
 	this->rowsNumbers = m.rowsNumbers ;
@@ -128,7 +128,7 @@ string CMatrix :: getstring (){
 		for(int j = 0; j < coloumnsNumbers ; j++)
 		{
 			char buffer [1000] ;
-			sprintf_s(buffer,"%g",matrix[i][j]);
+			sprintf(buffer,"%g",matrix[i][j]);
 			s+=buffer;
 			if (j != coloumnsNumbers-1) 
 				s+=" ";
@@ -142,11 +142,11 @@ return s ;
 } 
       //Multiplacation
 CMatrix& CMatrix :: operator* (CMatrix &x)
-	{
+{ 
 		if(coloumnsNumbers==x.rowsNumbers )
 			{
-			 static CMatrix m(this->matrixName,rowsNumbers,x.coloumnsNumbers,0,0);
-
+				CMatrix * m = new CMatrix(this->matrixName,rowsNumbers,x.coloumnsNumbers,0,0);
+			
 				for (int rows=0;rows<rowsNumbers;rows++)
 					{
 						for (int cols=0;cols<x.coloumnsNumbers;cols++)
@@ -156,11 +156,11 @@ CMatrix& CMatrix :: operator* (CMatrix &x)
 									{
 										sum+= this->matrix[rows][i]*x.matrix[i][cols];
 									}
-								m.matrix[rows][cols]=sum;
+								m->matrix[rows][cols]=sum;
 							}
 					}
-				return m;
-				m=*this;
+				return *m;
+				//m=*this;
 			}
 		else
 			{
@@ -183,7 +183,7 @@ CMatrix& CMatrix::operator - (CMatrix& m)
                 r.matrix[iR][iC] = matrix[iR][iC]- m.matrix[iR][iC];
               }
 	return r;
-	//r=*this;
+	r=*this;
 	}
         // plus operator
 CMatrix& CMatrix::operator +(CMatrix& m)
@@ -202,10 +202,10 @@ CMatrix& CMatrix::operator +(CMatrix& m)
               }
 		}
 	return r;
-	//r=*this;
+	r=*this;
 	}
         //Transpose function
-CMatrix CMatrix:: Transpose()
+/*CMatrix CMatrix:: Transpose()
 	{   
 		CMatrix r(this->matrixName,coloumnsNumbers,rowsNumbers,0,0);
 		for(int iR=0;iR<rowsNumbers;iR++)
@@ -217,7 +217,7 @@ CMatrix CMatrix:: Transpose()
 		}
 		return r;
 
-	}
+	}*/
 
 ostream& operator << (ostream& out , CMatrix& m){
  
@@ -226,7 +226,7 @@ ostream& operator << (ostream& out , CMatrix& m){
  
  }
 
-double CMatrix:: Determinant()
+/*double CMatrix:: Determinant()
 {
 	double det = 0;
 	double **pd = matrix;
@@ -413,7 +413,7 @@ CMatrix CMatrix:: COFactor()
 	}     
 	return cofactor;
 }
- CMatrix CMatrix:: Inverse()  
+ CMatrix& CMatrix:: Inverse()  
  {
 	 CMatrix cofactor("COF", rowsNumbers, coloumnsNumbers,1,1);
 	 CMatrix inv("INV", rowsNumbers, coloumnsNumbers,1,1);   
@@ -431,8 +431,114 @@ CMatrix CMatrix:: COFactor()
 		 }
 	 }
 	 return inv;   
- }    
- 
+ }    */
+ double Determinant(double **a,int n)
+{
+   int firstRowIndex,newColoumnIndex;
+   double det = 0;
+   double **newMatrix = NULL;
+    if (n == 2) 
+	
+	{
+      det = a[0][0] * a[1][1] - a[1][0] * a[0][1];
+	} 
+	else 
+	{
+      det = 0;
+      for (firstRowIndex=0;firstRowIndex<n;firstRowIndex++)
+	  {
+         newMatrix =new double*[n-1];
+         for (int ic=0;ic<n-1;ic++)
+           newMatrix[ic] =new double[n-1];
+         for (int newir=1;newir<n;newir++)
+		 {
+            newColoumnIndex = 0;
+            for (int ic=0;ic<n;ic++) 
+			{
+               if (ic == firstRowIndex)
+                  continue;
+               newMatrix[newir-1][newColoumnIndex] = a[newir][ic];
+               newColoumnIndex++;
+            }
+         }
+         det += pow(-1.0,firstRowIndex) * a[0][firstRowIndex] * Determinant(newMatrix,n-1);
+         for (int i=0;i<n-1;i++)
+            delete[]newMatrix[i];
+         delete[]newMatrix;
+      }
+   }
+   return(det);
+}
+double CMatrix::getDeterminant()
+{
+	double determinant=0;
+	determinant= Determinant(this->matrix,this->coloumnsNumbers);
+	return determinant;
+}
+void CoFactor(double **a,int n,double **b)//a is the original matrix and b is the cofactor matrix
+{
+   int c_RowIndex,c_ColoumnIndex;
+   double det;
+   double **c;//small matrix
+
+   c =new double*[n-1];
+   for (int i=0;i<n-1;i++)
+     c[i] =new double [n-1];
+
+   for (int j=0;j<n;j++) 
+   {
+      for (int i=0;i<n;i++)
+	  {
+         c_RowIndex = 0;
+         for (int OriginalRowIndex=0;OriginalRowIndex<n;OriginalRowIndex++) 
+		 {
+            if (OriginalRowIndex == i)
+               continue;
+            c_ColoumnIndex = 0;
+            for (int OriginalColoumnIndex=0;OriginalColoumnIndex<n;OriginalColoumnIndex++) 
+			{
+               if (OriginalColoumnIndex == j)
+                  continue;
+               c[c_RowIndex][c_ColoumnIndex] = a[OriginalRowIndex][OriginalColoumnIndex];
+               c_ColoumnIndex++;
+            }
+            c_RowIndex++;
+         }
+         det = Determinant(c,n-1);
+         // Fill in the elements of the cofactor
+         b[i][j] = pow(-1.0,i+j+2.0) * det;//the new cofactor matrix
+      }
+   }
+   for (int i=0;i<n-1;i++)
+      free(c[i]);
+   free(c);
+}
+CMatrix& CMatrix:: getinverse()
+{
+	CMatrix m=*this;
+	double determinant=m.getDeterminant();
+	if(determinant==0)
+	{
+		cout<<"there's no inverse matrix as determinant =0"<<endl;
+		exit(1);
+	}
+	CMatrix r("",rowsNumbers,coloumnsNumbers,0,0);
+	CoFactor(this->matrix,this->coloumnsNumbers,r.matrix);
+	for(int iR=0;iR<rowsNumbers;iR++)
+		for(int iC=0;iC<coloumnsNumbers;iC++)
+			r.matrix[iR][iC]=(r.matrix[iR][iC]/determinant);
+	 static CMatrix p = r.getTranspose();
+		return p ;
+}
+CMatrix& CMatrix::operator / (CMatrix& m)
+{
+	CMatrix r=*this; 
+	CMatrix o = m.getinverse();
+	static CMatrix y = r * o ;
+	return y;
+	//y=*this;
+
+}
  void CMatrix:: setName(string name)
  {
 	 strcpy(matrixName,name.c_str());
@@ -448,26 +554,48 @@ CMatrix CMatrix:: COFactor()
 	return s;
  }
  
-CMatrix& CMatrix:: operator = (const CMatrix &m)
+CMatrix& CMatrix:: operator = (CMatrix &other)
  {
-	//strcpy(matrixName,m.matrixName);
 	
-	this->coloumnsNumbers = m.coloumnsNumbers;
-	this->rowsNumbers = m.rowsNumbers ;
+	
+	this->coloumnsNumbers = other.coloumnsNumbers;
+	this->rowsNumbers = other.rowsNumbers ;
 	matrix = new double*[rowsNumbers] ;
 	for (int i = 0 ; i < this->rowsNumbers ; i++)
 	{    
 		matrix[i] = new double[this->coloumnsNumbers];
 		for(int j=0;j < this->coloumnsNumbers;j++)
 		{
-			this->matrix[i][j]=m.matrix[i][j] ;
+			this->matrix[i][j]=other.matrix[i][j] ;
 		}
 	}
 	return *this;
 }
-CMatrix& CMatrix:: operator / (CMatrix& m)
+CMatrix& CMatrix::getTranspose()
+	{
+		//CMatrix r=*this;
+		static CMatrix r("",this->coloumnsNumbers,this->rowsNumbers,0,0);
+		for(int iR=0;iR<rowsNumbers;iR++)
+		{
+			for(int iC=0;iC<coloumnsNumbers;iC++)
+			{
+				r.matrix[iC][iR]=matrix[iR][iC];
+			}
+		}
+		return r;
+
+	}
+CMatrix& CMatrix::operator*(double d)
 {
-	static CMatrix r("",this->rowsNumbers,m.coloumnsNumbers,0,0);
-	r = *this * m.Inverse();
+	CMatrix r = *this;
+	for(int iR=0;iR<rowsNumbers;iR++)
+		for(int iC=0;iC<coloumnsNumbers;iC++)
+			r.matrix[iR][iC]=matrix[iR][iC] * d;
 	return r;
 }
+/*CMatrix& CMatrix:: operator / (CMatrix& const m)
+{
+	static CMatrix r("",this->rowsNumbers,m.coloumnsNumbers,0,0);
+	r = *this * m.getinverse();
+	return r;
+}*/
