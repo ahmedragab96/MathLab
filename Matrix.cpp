@@ -5,7 +5,8 @@
 #include <math.h>
 #include <cstring>
 #include <fstream>
-#include "matrix.h"
+#include <stdlib.h>
+#include "Matrix.h"
 using namespace std;
           // Default Constructor
 CMatrix :: CMatrix ()
@@ -66,11 +67,11 @@ CMatrix :: CMatrix (string inputLine)
     char* token_c = NULL;
 	char* rowString = new char [x.length()+1];;
 	strcpy(rowString,x.c_str());
-	token_c = strtok_s(rowString , seps_c, &context_c);
+	token_c = strtok(rowString , seps_c);
 	while(token_c)
 	{
 		 cols++;
-		token_c = strtok_s(NULL , seps_c, &context_c);
+		token_c = strtok(NULL , seps_c);
 	}
 	coloumnsNumbers = cols;
     char* stringToBeSplitted = new char [inputLine.length()+1];
@@ -78,9 +79,9 @@ CMatrix :: CMatrix (string inputLine)
 	char* seps = " ,;=[]";
 	char* context = NULL;
     char* token = NULL;
-	token = strtok_s(stringToBeSplitted , seps, &context);
+	token = strtok(stringToBeSplitted , seps);
 	strcpy(matrixName,token);
-	token = strtok_s(NULL,seps,&context);
+	token = strtok(NULL,seps);
 	for (int i =0;i< rowsNumbers;i++)
 	{
 		matrix[i] = new double [coloumnsNumbers];
@@ -88,7 +89,7 @@ CMatrix :: CMatrix (string inputLine)
 		{
 			double item = atof(token);
 			matrix[i][j]=item;
-			token = strtok_s(NULL,seps,&context);
+			token = strtok(NULL,seps);
 		}
 	}
 }
@@ -128,7 +129,7 @@ string CMatrix :: getstring (){
 		for(int j = 0; j < coloumnsNumbers ; j++)
 		{
 			char buffer [1000] ;
-			sprintf_s(buffer,"%g",matrix[i][j]);
+			sprintf(buffer,"%g",matrix[i][j]);
 			s+=buffer;
 			if (j != coloumnsNumbers-1) 
 				s+=" ";
@@ -142,47 +143,47 @@ return s ;
 } 
       //Multiplacation
 CMatrix& CMatrix :: operator* (CMatrix &x)
+{
+	if(this->coloumnsNumbers==x.rowsNumbers )
 	{
-		if(coloumnsNumbers==x.rowsNumbers )
-			{
-			 static CMatrix m(this->matrixName,rowsNumbers,x.coloumnsNumbers,0,0);
+	CMatrix *rere = new CMatrix (this->matrixName,rowsNumbers,x.coloumnsNumbers,0,0);
 
-				for (int rows=0;rows<rowsNumbers;rows++)
-					{
-						for (int cols=0;cols<x.coloumnsNumbers;cols++)
-							{
-								double sum=0;
-								for (int i=0;i<coloumnsNumbers;i++)
-									{
-										sum+= this->matrix[rows][i]*x.matrix[i][cols];
-									}
-								m.matrix[rows][cols]=sum;
-							}
-					}
-				return m;
-				m=*this;
-			}
-		else
+		for (int rows=0;rows<rowsNumbers;rows++)
 			{
-				cout<<"Multiplication is invalied edit your matrix size, this is your matrix : "<<endl;
-				return x;
+				for (int cols=0;cols<x.coloumnsNumbers;cols++)
+					{
+						double sum=0;
+						for (int i=0;i<coloumnsNumbers;i++)
+							{
+								sum+= this->matrix[rows][i]*x.matrix[i][cols];
+							}
+						rere->matrix[rows][cols]=sum;
+					}
 			}
+		return *rere;
 	}
+	else
+	{
+		throw("Cannot Multiply Matrices: 1st cols != 2nd rows");
+
+	}
+}
           // Minus operator
 CMatrix& CMatrix::operator - (CMatrix& m)
 	{	
       if(rowsNumbers!=m.rowsNumbers||coloumnsNumbers!=m.coloumnsNumbers)
 	  {
-			cout<<"Invalid matrix dimension please fix it"<<endl;
-			return m;
+			throw("Substraction must be among matrices of same order");
+
 	  }
-	  static CMatrix r(this->matrixName,rowsNumbers,coloumnsNumbers,0,0);
-        for(int iR=0;iR<r.rowsNumbers;iR++)
-            for(int iC=0;iC<r.coloumnsNumbers;iC++)
+	else { CMatrix *r = new CMatrix (this->matrixName,rowsNumbers,coloumnsNumbers,0,0);
+        for(int iR=0;iR<rowsNumbers;iR++)
+            for(int iC=0;iC<coloumnsNumbers;iC++)
               {
-                r.matrix[iR][iC] = matrix[iR][iC]- m.matrix[iR][iC];
+                r->matrix[iR][iC] = this->matrix[iR][iC]- m.matrix[iR][iC];
               }
-	return r;
+	return *r; 
+	}
 	//r=*this;
 	}
         // plus operator
@@ -190,32 +191,31 @@ CMatrix& CMatrix::operator +(CMatrix& m)
 	{	
       if(rowsNumbers!=m.rowsNumbers||coloumnsNumbers!=m.coloumnsNumbers)
 	  {
-			cout<<"Invalid matrix dimension please fix it"<<endl;
-			return m;
+			throw("Addiion must be among matrices of same order");
 	  }
-      static CMatrix r(this->matrixName,this->rowsNumbers,this->coloumnsNumbers,0,0);
-        for(int iR=0;iR<r.rowsNumbers;iR++)
+         else {CMatrix *r = new CMatrix(this->matrixName,this->rowsNumbers,this->coloumnsNumbers,0,0);
+        for(int iR=0;iR<rowsNumbers;iR++)
 		{
-			for(int iC=0;iC<r.coloumnsNumbers;iC++)
+			for(int iC=0;iC<coloumnsNumbers;iC++)
               {
-                r.matrix[iR][iC] = this->matrix[iR][iC]+ m.matrix[iR][iC];
+                r->matrix[iR][iC] = this->matrix[iR][iC]+ m.matrix[iR][iC];
               }
 		}
-	return r;
+	return *r;}
 	//r=*this;
 	}
         //Transpose function
 CMatrix CMatrix:: Transpose()
 	{   
-		CMatrix r(this->matrixName,coloumnsNumbers,rowsNumbers,0,0);
+		CMatrix *r = new CMatrix(this->matrixName,coloumnsNumbers,rowsNumbers,0,0);
 		for(int iR=0;iR<rowsNumbers;iR++)
 		{
 			for(int iC=0;iC<coloumnsNumbers;iC++)
 			{
-				r.matrix[iC][iR]=matrix[iR][iC];
+				r->matrix[iC][iR]=matrix[iR][iC];
 			}
 		}
-		return r;
+		return *r;
 
 	}
 
@@ -343,18 +343,18 @@ double CMatrix:: Determinant()
 }
 CMatrix CMatrix:: COFactor()  
 {
-	CMatrix cofactor("COF", rowsNumbers, coloumnsNumbers,1,1);
+	CMatrix *cofactor = new CMatrix("COF", rowsNumbers, coloumnsNumbers,1,1);
 	if (rowsNumbers != coloumnsNumbers) 
-		return cofactor; 
+		return *cofactor; 
 	if (rowsNumbers < 2)   
-		return cofactor;   
+		return *cofactor;   
 	else if (rowsNumbers == 2)    
 	{        
-		cofactor.matrix[0][0] = matrix[1][1];   
-		cofactor.matrix[0][1] = -matrix[1][0];       
-		cofactor.matrix[1][0] = -matrix[0][1];    
-		cofactor.matrix[1][1] = matrix[0][0];    
-		return cofactor; 
+		cofactor->matrix[0][0] = matrix[1][1];   
+		cofactor->matrix[0][1] = -matrix[1][0];       
+		cofactor->matrix[1][0] = -matrix[0][1];    
+		cofactor->matrix[1][1] = matrix[0][0];    
+		return *cofactor; 
 	}  
 	else if (rowsNumbers >= 3)      
 	{       
@@ -394,12 +394,12 @@ CMatrix CMatrix:: COFactor()
 			{                
 				if (flagPositive == true)      
 				{                 
-					cofactor.matrix[k1][k2] = temp[k1][k2]->Determinant();    
+					cofactor->matrix[k1][k2] = temp[k1][k2]->Determinant();    
 					flagPositive = false;    
 				}          
 				else     
 				{     
-					cofactor.matrix[k1][k2] = -temp[k1][k2]->Determinant();
+					cofactor->matrix[k1][k2] = -temp[k1][k2]->Determinant();
 					flagPositive = true; 
 				}     
 			}     
@@ -411,26 +411,33 @@ CMatrix CMatrix:: COFactor()
 			delete[] temp[i];   
 		delete[] temp;    
 	}     
-	return cofactor;
+	return *cofactor;
 }
- CMatrix CMatrix:: Inverse()  
+ CMatrix& CMatrix:: Inverse()  
  {
 	 CMatrix cofactor("COF", rowsNumbers, coloumnsNumbers,1,1);
-	 CMatrix inv("INV", rowsNumbers, coloumnsNumbers,1,1);   
+	CMatrix* inv = new CMatrix("INV", rowsNumbers, coloumnsNumbers,1,1);   
 	 if (rowsNumbers!= coloumnsNumbers)  
-		 return inv;    
+		 return *inv;    
 	 // to find out Determinant   
 	 double det = this->Determinant();  
 	 cofactor = this->COFactor();      
 	 // inv = transpose of cofactor / Determinant     
 	 for (int i = 0; i < rowsNumbers; i++)      
 	 {
-		 for (int j = 0; j < coloumnsNumbers; j++)      
-		 {              
-			 inv.matrix[j][i] = cofactor.matrix[i][j] / det;   
+		 if(det==0)
+		 {
+			 throw("Determinant is equal zero division is invalid");
+		 }
+		 else
+		 {
+			for (int j = 0; j < coloumnsNumbers; j++)      
+			{              
+				inv->matrix[j][i] = cofactor.matrix[i][j] / det;   
+			}
 		 }
 	 }
-	 return inv;   
+	 return *inv;   
  }    
  
  void CMatrix:: setName(string name)
@@ -465,9 +472,38 @@ CMatrix& CMatrix:: operator = (const CMatrix &m)
 	}
 	return *this;
 }
-CMatrix& CMatrix:: operator / (CMatrix& m)
+CMatrix& CMatrix:: operator / ( CMatrix& m)
 {
-	static CMatrix r("",this->rowsNumbers,m.coloumnsNumbers,0,0);
-	r = *this * m.Inverse();
-	return r;
+	CMatrix* r = new CMatrix("",this->rowsNumbers,m.coloumnsNumbers,0,0);
+	if ((m.rowsNumbers == m.coloumnsNumbers) )
+	{
+		*r = *this * m.Inverse();
+		return *r;
+	}
+	else throw("Invalid matrix dimension please fix it");
+}
+ CMatrix& elementDivision(CMatrix &m,CMatrix &c)
+{
+	
+	if(m.rowsNumbers!=c.rowsNumbers||m.coloumnsNumbers!=c.coloumnsNumbers)
+	{
+		
+		throw("Invalid matrix dimension please fix it");
+		
+	}
+	else
+	{
+		CMatrix *r=new CMatrix("",m.rowsNumbers,m.coloumnsNumbers,0,0);
+		
+		for(int ir=0;ir<m.rowsNumbers;ir++)
+		{
+			for(int ic=0;ic<m.coloumnsNumbers;ic++)
+			{
+			r->matrix[ir][ic]=m.matrix[ir][ic]/c.matrix[ir][ic];
+
+			}
+		}
+	return *r;
+	}
+	
 }
