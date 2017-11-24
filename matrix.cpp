@@ -205,7 +205,7 @@ CMatrix& CMatrix::operator +(CMatrix& m)
 	//r=*this;
 	}
         //Transpose function
-CMatrix CMatrix:: Transpose()
+CMatrix& CMatrix:: Transpose()
 	{   
 		CMatrix *r = new CMatrix(this->matrixName,coloumnsNumbers,rowsNumbers,0,0);
 		for(int iR=0;iR<rowsNumbers;iR++)
@@ -225,8 +225,40 @@ ostream& operator << (ostream& out , CMatrix& m){
  return out ;
  
  }
-
 double CMatrix:: Determinant()
+{
+	int counter = 1;
+	for (int i=0;i<this->rowsNumbers;i++)                    //Pivotisation
+		for (int k=i+1;k<this->coloumnsNumbers;k++)
+            if (abs(this->matrix[i][i])<abs(this->matrix[k][i]))
+			{   counter *= -1 ;
+				for (int j=0;j<=this->rowsNumbers;j++)
+                {
+                    double temp=this->matrix[i][j];
+                    this->matrix[i][j]=this->matrix[k][j];
+                    this->matrix[k][j]=temp;
+				}
+			}
+	
+				for (int i=0 ; i<(this->coloumnsNumbers)-1 ; i++) 
+				{   int zero_counter = 0 ;
+					for (int l = 0 ; l < this->rowsNumbers ; l++)
+							if (matrix[l][l] == 0) zero_counter++ ;
+					if (zero_counter > 1) return 0 ;
+						//loop to perform the gauss elimination
+					for (int k=i+1 ; k < this->coloumnsNumbers ; k++)
+                {
+                double t = this->matrix[k][i] / this->matrix[i][i];
+				for (int j=0 ; j < this->coloumnsNumbers  ; j++)
+                    this->matrix[k][j] = this->matrix[k][j]- t*this->matrix[i][j];    //make the elements below the pivot elements equal to zero or elimnate the variables
+					}}
+double deter = 1 ;
+for (int i = 0 ; i < rowsNumbers ; i++)
+		deter *= this->matrix[i][i];
+
+return deter*counter ;
+}
+/*double CMatrix:: Determinant()
 {
 	double det = 0;
 	double **pd = matrix;
@@ -340,7 +372,7 @@ double CMatrix:: Determinant()
 		}
 		break;
 	}
-}
+}*/
 CMatrix CMatrix:: COFactor()  
 {
 	CMatrix *cofactor = new CMatrix("COF", rowsNumbers, coloumnsNumbers,1,1);
