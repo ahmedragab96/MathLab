@@ -1,27 +1,19 @@
 #include <iostream>
 #include <string>
-#include <cstdio>
-#include "stdarg.h"
-#include <math.h>
-#include "Matrix.h"
-#include "matlab.h"
-#include <cstring>
+#include <sstream>
+#include <stdlib.h>
+#include "CColor.h"
+using namespace std ;
 
-using namespace std;
+int main () {
 
 
-int main (int argc , char* argv[]){
-	
-	Matlab myMatlab1;
-	if(argc > 1)
-	{
-		myMatlab1.loadfile("D://testmatrix.txt");
-	}
-	else
-	{
-		myMatlab1.loadfile("D://testmatrix.txt");
-	}
-	system("pause");
-	return 0;
+	CColor a(255,128,192);
+	CColor b(0x00667755) ;
+	cout << "Color a = " << a << endl;
+	cout << "Color b = " << b("hex") << endl;
+	CColor c(0x00552211);
+	CColor y = average(a,b,c);
+	cout << "Color y = " << y << endl;
+	return 0 ;
 }
-
